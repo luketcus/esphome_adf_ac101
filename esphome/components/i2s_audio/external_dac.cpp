@@ -176,7 +176,7 @@ bool ES8388::set_mute_audio( bool mute ){
 #define AC101_ERROR_CHECK(func)                                                \
   if (!(func)) {                                                               \
     esph_log_d(TAG, "AC101 failed");                                           \
-    return false                                                               \
+    return false;                                                               \
   }
 #define AC101_READ_REG(reg, value) AC101_ERROR_CHECK(this->ReadReg(reg, value));
 #define AC101_WRITE_REG(reg, value)                                            \
@@ -270,22 +270,23 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
   return true;
 }
 bool AC101::set_volume( float volume ){
-  if (volume > 63)
-    volume = 63;
+  uint8_t int_volume = volume * 1.;
+  if (int_volume > 63)
+    int_volume = 63;
 
   uint16_t val;
   AC101_READ_REG(AC101_HPOUT_CTRL, &val);
   val &= ~(0x3F << 4);  // Corrigido para limpar os bits corretos
-  val |= (volume & 0x3F) << 4;  
+  val |= (int_volume & 0x3F) << 4;  
   AC101_WRITE_REG(AC101_HPOUT_CTRL, val); 
   
-  volume /= 2;
-  if (volume > 31)
-    volume = 31;
+  int_volume /= 2;
+  if (int_volume > 31)
+    int_volume = 31;
 
   AC101_READ_REG(AC101_SPKOUT_CTRL, &val);
   val &= ~31;
-  val |= volume;
+  val |= int_volume;
   AC101_WRITE_REG(AC101_SPKOUT_CTRL, val);
   return true;
 }

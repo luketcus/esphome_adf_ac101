@@ -33,7 +33,7 @@ This custom component includes:
 external_components:
   - source:
       type: git
-      url: https://github.com/gnumpi/esphome_audio
+      url: https://github.com/luketcus/esphome_audio
       ref: main
     components: [ adf_pipeline, i2s_audio ]
 ```

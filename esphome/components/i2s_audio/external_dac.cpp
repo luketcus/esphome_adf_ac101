@@ -289,7 +289,7 @@ bool AC101::set_volume( float volume ){
   AC101_WRITE_REG(AC101_SPKOUT_CTRL, val);
   return true;
 }
-bool ES8388::set_mute_audio( bool mute ){
+bool AC101::set_mute_audio( bool mute ){
   return true;
 }
 }

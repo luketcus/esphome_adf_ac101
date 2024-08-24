@@ -311,8 +311,8 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
   AC101_WRITE_REG(AC101_I2S_SR_CTRL, rate);
   //bits_per_sample
     uint8_t bits;
-
-    switch (i2s_cfg.bits_per_sample) {
+    uint8_t bps = (uint8_t) i2s_cfg.bits_per_sample;
+    switch (bps) {
         case 8:
             bits = 0x00;
             break;
@@ -327,7 +327,7 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
             break;
         default:
             rate = 0x01;
-            esph_log_e(TAG, "Unsupported bits per sample: %d", bitsPerSample);
+            esph_log_e(TAG, "Unsupported bits per sample: %d", bps);
     }
   uint16_t val;
   AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);

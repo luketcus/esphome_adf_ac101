@@ -84,6 +84,65 @@ static const uint8_t AC101_REGS[] = {
     AC101_AC_DAC_DAPLETHD,  AC101_AC_DAC_DAPHGKPA,  AC101_AC_DAC_DAPLGKPA,
     AC101_AC_DAC_DAPHGOPA,  AC101_AC_DAC_DAPLGOPA,  AC101_AC_DAC_DAPOPT,
     AC101_DAC_DAP_ENA};
+enum I2sSampleRate_t {
+  SAMPLE_RATE_8000 = 0x0000,
+  SAMPLE_RATE_11052 = 0x1000,
+  SAMPLE_RATE_12000 = 0x2000,
+  SAMPLE_RATE_16000 = 0x3000,
+  SAMPLE_RATE_22050 = 0x4000,
+  SAMPLE_RATE_24000 = 0x5000,
+  SAMPLE_RATE_32000 = 0x6000,
+  SAMPLE_RATE_44100 = 0x7000,
+  SAMPLE_RATE_48000 = 0x8000,
+  SAMPLE_RATE_96000 = 0x9000,
+  SAMPLE_RATE_192000 = 0xa000,
+};
+
+enum I2sMode_t {
+  MODE_MASTER = 0x00,
+  MODE_SLAVE = 0x01,
+};
+
+enum I2sWordSize_t {
+  WORD_SIZE_8_BITS = 0x00,
+  WORD_SIZE_16_BITS = 0x01,
+  WORD_SIZE_20_BITS = 0x02,
+  WORD_SIZE_24_BITS = 0x03,
+};
+
+enum I2sFormat_t {
+  DATA_FORMAT_I2S = 0x00,
+  DATA_FORMAT_LEFT = 0x01,
+  DATA_FORMAT_RIGHT = 0x02,
+  DATA_FORMAT_DSP = 0x03,
+};
+
+enum I2sBitClockDiv_t {
+  BCLK_DIV_1 = 0x0,
+  BCLK_DIV_2 = 0x1,
+  BCLK_DIV_4 = 0x2,
+  BCLK_DIV_6 = 0x3,
+  BCLK_DIV_8 = 0x4,
+  BCLK_DIV_12 = 0x5,
+  BCLK_DIV_16 = 0x6,
+  BCLK_DIV_24 = 0x7,
+  BCLK_DIV_32 = 0x8,
+  BCLK_DIV_48 = 0x9,
+  BCLK_DIV_64 = 0xa,
+  BCLK_DIV_96 = 0xb,
+  BCLK_DIV_128 = 0xc,
+  BCLK_DIV_192 = 0xd,
+};
+
+enum I2sLrClockDiv_t {
+  LRCK_DIV_16 = 0x0,
+  LRCK_DIV_32 = 0x1,
+  LRCK_DIV_64 = 0x2,
+  LRCK_DIV_128 = 0x3,
+  LRCK_DIV_256 = 0x4,
+};
+
+enum Mode_t { MODE_ADC, MODE_DAC, MODE_ADC_DAC, MODE_LINE };
 class ExternalDAC : public i2c::I2CDevice {
 public:
   virtual bool init_device() = 0;

@@ -262,6 +262,7 @@ bool AC101::init_device(){
   delay(100);
   AC101_WRITE_REG(AC101_HPOUT_CTRL, 0xfbc0);
   AC101_WRITE_REG(AC101_SPKOUT_CTRL, 0xeabd);
+  this->set_volume(63);
   return true;
 }
 
@@ -270,7 +271,7 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
   return true;
 }
 bool AC101::set_volume( float volume ){
-  uint8_t int_volume = volume * 1.;
+  uint8_t int_volume = volume * 100.;
   if (int_volume > 63)
     int_volume = 63;
 

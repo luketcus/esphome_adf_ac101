@@ -23,7 +23,7 @@ This customized version of *i2s_audio* offers several enhancements:
 This custom component includes:
 
 - **Integration support for *media_player* within the IDF framework**
-- **Flexible setup combining various audio transports:** Allows combination of *microphone*, *speaker*, and *media_player* with different audio transports such as I2S, http, Bluetooth (work in progress), USB (work in progress), and custom implementations (e.g., Wishbone via SPI). See more [here](https://github.com/gnumpi/esphome_matrixio).
+- **Flexible setup combining various audio transports:** Allows combination of *microphone*, *speaker*, and *media_player* with different audio transports such as I2S, http, Bluetooth (work in progress), USB (work in progress), and custom implementations (e.g., Wishbone via SPI). See more [here](https://github.com/luketcus/esphome_matrixio).
 - **Optional resampling feature:** Facilitates the resampling of the audio stream to accommodate different output requirements.
 
 ### Configurations

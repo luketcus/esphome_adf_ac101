@@ -173,33 +173,124 @@ bool ES8388::set_mute_audio( bool mute ){
   return true;
 }
 
-bool AC101::init_device(){
-  this->write_byte(CHIP_AUDIO_RS, 0x123);
-  delay(1);
-  this->write_byte(SPKOUT_CTRL, 0xe880);
-  this->write_byte((PLL_CTRL1, 0x014f);
-  this->write_byte(PLL_CTRL2, 0x8600);
-  this->write_byte(SYSCLK_CTRL, 0x8b08);
-  this->write_byte(MOD_CLK_ENA, 0x800c);
-  this->write_byte(MOD_RST_CTRL, 0x800c);
-  this->write_byte(I2S_SR_CTRL, 0x7000);
-  this->write_byte(I2S1LCK_CTRL, 0x8850);
-  this->write_byte(I2S1_SDOUT_CTRL, 0xc000);
-  this->write_byte(I2S1_SDIN_CTRL, 0xc000);
-  this->write_byte(I2S1_MXR_SRC, 0x2200);
-  this->write_byte(ADC_SRCBST_CTRL, 0xccc4);
-  this->write_byte(ADC_SRC, 0x2020);
-  this->write_byte(ADC_DIG_CTRL, 0x8000);
-  this->write_byte(ADC_APC_CTRL, 0xbbc3);
-  this->write_byte(DAC_MXR_SRC, 0xcc00);
-  this->write_byte(DAC_DIG_CTRL, 0x8000);
-  this->write_byte(OMIXER_SR, 0x0081);
-  this->write_byte(OMIXER_DACA_CTRL, 0xf080);
-  this->write_byte(0x58, 0xeabd);
-  
+#define AC101_ERROR_CHECK(func)                                                \
+  if (!(func)) {                                                               \
+    this->mark_failed();                                                       \
+    return;                                                                    \
+  }
+#define AC101_READ_REG(reg, value) AC101_ERROR_CHECK(this->ReadReg(reg, value));
+#define AC101_WRITE_REG(reg, value)                                            \
+  AC101_ERROR_CHECK(this->WriteReg(reg, value));
+
+bool AC101::WriteReg(uint8_t reg, uint16_t value) {
+  return this->write_bytes_16(reg, &value, 1);
+}
+
+bool AC101::ReadReg(uint8_t reg, uint16_t *value) {
+  return this->read_bytes_16(reg, value, 1);
 }
 
 
+bool AC101::init_device(){
+  uint16_t val;
+  // Reset all registers, readback default as sanity check
+  AC101_WRITE_REG(AC101_CHIP_AUDIO_RS, 0x0123);
+  delay(100);
+  {
+    AC101_READ_REG(AC101_CHIP_AUDIO_RS, &val);
+    if (val != 0x0101) {
+      this->mark_failed();
+      return;
+    }
+  }
+
+  AC101_WRITE_REG(AC101_SPKOUT_CTRL, 0xe880);
+
+  // Enable the PLL from 256*44.1KHz MCLK source
+  AC101_WRITE_REG(AC101_PLL_CTRL1, 0x014f);
+  AC101_WRITE_REG(AC101_PLL_CTRL2, 0x8600);
+
+  // Clocking system
+  AC101_WRITE_REG(AC101_SYSCLK_CTRL, 0x8b08);
+  AC101_WRITE_REG(AC101_MOD_CLK_ENA, 0x800c);
+  AC101_WRITE_REG(AC101_MOD_RST_CTRL, 0x800c);
+    // Set default at I2S, 44.1KHz, 16bit
+  AC101_WRITE_REG(AC101_I2S_SR_CTRL, SAMPLE_RATE_44100);
+//SetI2sClock
+  AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
+  val &= ~0x7FC0;
+  val |= uint16_t(0) << 14;
+  val |= uint16_t(BCLK_DIV_8) << 9;
+  val |= uint16_t(0) << 13;
+  val |= uint16_t(LRCK_DIV_32) << 6;
+  //SetI2sMode
+  AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
+  AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
+  val &= ~0x8000;
+  val |= uint16_t(MODE_SLAVE) << 15;
+  AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
+  //SetI2sWordSize
+  AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
+  val &= ~0x0030;
+  val |= uint16_t(WORD_SIZE_16_BITS) << 4;
+  AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
+  //SetI2sFormat
+  AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
+  val &= ~0x000C;
+  val |= uint16_t(DATA_FORMAT_I2S) << 2;
+  AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
+  // AIF config
+  AC101_WRITE_REG(AC101_I2S1_SDOUT_CTRL, 0xc000);
+  AC101_WRITE_REG(AC101_I2S1_SDIN_CTRL, 0xc000);
+  AC101_WRITE_REG(AC101_I2S1_MXR_SRC, 0x2200);
+
+  AC101_WRITE_REG(AC101_ADC_SRCBST_CTRL, 0xccc4);
+  AC101_WRITE_REG(AC101_ADC_SRC, 0x2020);
+  AC101_WRITE_REG(AC101_ADC_DIG_CTRL, 0x8000);
+  AC101_WRITE_REG(AC101_ADC_APC_CTRL, 0xbbc3);
+
+  // Path Configuration
+  AC101_WRITE_REG(AC101_DAC_MXR_SRC, 0xcc00);
+  AC101_WRITE_REG(AC101_DAC_DIG_CTRL, 0x8000);
+  AC101_WRITE_REG(AC101_OMIXER_SR, 0x0081);
+  AC101_WRITE_REG(AC101_OMIXER_DACA_CTRL, 0xf080);
+
+  this->SetMode(MODE_ADC_DAC);
+  AC101_WRITE_REG(AC101_MOD_CLK_ENA, 0x800c);
+  AC101_WRITE_REG(AC101_MOD_RST_CTRL, 0x800c);
+  AC101_WRITE_REG(AC101_OMIXER_DACA_CTRL, 0xff80);
+  delay(100);
+  AC101_WRITE_REG(AC101_HPOUT_CTRL, 0xfbc0);
+  AC101_WRITE_REG(AC101_SPKOUT_CTRL, 0xeabd);
+}
+
+bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
+  esph_log_d(TAG, "Setup AC101");
+  return true;
+}
+bool AC101::set_volume( float volume ){
+  if (volume > 63)
+    volume = 63;
+
+  uint16_t val;
+  AC101_READ_REG(AC101_HPOUT_CTRL, &val);
+  val &= ~(0x3F << 4);  // Corrigido para limpar os bits corretos
+  val |= (volume & 0x3F) << 4;  
+  AC101_WRITE_REG(AC101_HPOUT_CTRL, val); 
+  
+  volume /= 2;
+  if (volume > 31)
+    volume = 31;
+
+  AC101_READ_REG(AC101_SPKOUT_CTRL, &val);
+  val &= ~31;
+  val |= volume;
+  AC101_WRITE_REG(AC101_SPKOUT_CTRL, val);
+  return true;
+}
+bool ES8388::set_mute_audio( bool mute ){
+  return true;
+}
 }
 }
 

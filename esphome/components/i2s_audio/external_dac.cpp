@@ -326,7 +326,7 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
             bits = 0x03;
             break;
         default:
-            rate = 0x01;
+            bits = 0x01;
             esph_log_e(TAG, "Unsupported bits per sample: %d", bps);
     }
   uint16_t val;

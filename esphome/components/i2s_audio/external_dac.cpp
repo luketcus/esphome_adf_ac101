@@ -272,40 +272,37 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
   uint16_t rate;
   switch (i2s_cfg.sample_rate) {
         case 8000:
-            rate = 0x0000;
-            break;
-        case 11052:
             rate = 0x1000;
             break;
-        case 12000:
+        case 11052:
             rate = 0x2000;
             break;
-        case 16000:
+        case 12000:
             rate = 0x3000;
             break;
-        case 22050:
+        case 16000:
             rate = 0x4000;
             break;
-        case 24000:
+        case 22050:
             rate = 0x5000;
             break;
-        case 32000:
+        case 24000:
             rate = 0x6000;
             break;
-        case 44100:
+        case 32000:
             rate = 0x7000;
             break;
-        case 48000:
+        case 44100:
             rate = 0x8000;
             break;
-        case 96000:
+        case 48000:
             rate = 0x9000;
             break;
-        case 192000:
+        case 96000:
             rate = 0xa000;
             break;
         default:
-            rate = 0x3000;
+            rate = 0x6000;
             esph_log_d(TAG,"Taxa de amostragem inválida");
     }
   AC101_WRITE_REG(AC101_I2S_SR_CTRL, rate);

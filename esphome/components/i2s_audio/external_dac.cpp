@@ -307,13 +307,12 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
         default:
             rate = 0x3000;
             esph_log_d(TAG,"Taxa de amostragem inválida");
-            return;  // Saia da função se a taxa for inválida
     }
   AC101_WRITE_REG(AC101_I2S_SR_CTRL, rate);
   //bits_per_sample
-    uint16_t bits;
+    uint8_t bits;
 
-    switch (bitsPerSample) {
+    switch (i2s_cfg.bits_per_sample) {
         case 8:
             bits = 0x00;
             break;
@@ -328,7 +327,7 @@ bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
             break;
         default:
             rate = 0x01;
-            esph_log_e(TAG, "Unsupported bits per sample: %d", bps);
+            esph_log_e(TAG, "Unsupported bits per sample: %d", bitsPerSample);
     }
   uint16_t val;
   AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);

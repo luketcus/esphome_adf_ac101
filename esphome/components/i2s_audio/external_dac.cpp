@@ -266,10 +266,79 @@ bool AC101::init_device(){
   return true;
 }
 
+
 bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
   esph_log_d(TAG, "Setup AC101");
+  uint16_t rate;
+  switch (i2s_cfg.sample_rate) {
+        case 8000:
+            rate = 0x0000;
+            break;
+        case 11052:
+            rate = 0x1000;
+            break;
+        case 12000:
+            rate = 0x2000;
+            break;
+        case 16000:
+            rate = 0x3000;
+            break;
+        case 22050:
+            rate = 0x4000;
+            break;
+        case 24000:
+            rate = 0x5000;
+            break;
+        case 32000:
+            rate = 0x6000;
+            break;
+        case 44100:
+            rate = 0x7000;
+            break;
+        case 48000:
+            rate = 0x8000;
+            break;
+        case 96000:
+            rate = 0x9000;
+            break;
+        case 192000:
+            rate = 0xa000;
+            break;
+        default:
+            rate = 0x3000;
+            esph_log_d(TAG,"Taxa de amostragem inválida");
+            return;  // Saia da função se a taxa for inválida
+    }
+  AC101_WRITE_REG(AC101_I2S_SR_CTRL, rate);
+  //bits_per_sample
+    uint16_t bits;
+
+    switch (bitsPerSample) {
+        case 8:
+            bits = 0x00;
+            break;
+        case 16:
+            bits = 0x01;
+            break;
+        case 20:
+            bits = 0x02;
+            break;
+        case 24:
+            bits = 0x03;
+            break;
+        default:
+            rate = 0x01;
+            esph_log_e(TAG, "Unsupported bits per sample: %d", bps);
+    }
+  uint16_t val;
+  AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
+  val &= ~0x0030;
+  val |= uint16_t(bits) << 4;
+  AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
+  
   return true;
 }
+
 bool AC101::set_volume( float volume ){
   uint8_t int_volume = volume * 100.;
   if (int_volume > 63)

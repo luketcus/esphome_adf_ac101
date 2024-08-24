@@ -173,6 +173,32 @@ bool ES8388::set_mute_audio( bool mute ){
   return true;
 }
 
+bool AC101::init_device(){
+  this->write_byte(CHIP_AUDIO_RS, 0x123);
+  delay(1);
+  this->write_byte(SPKOUT_CTRL, 0xe880);
+  this->write_byte((PLL_CTRL1, 0x014f);
+  this->write_byte(PLL_CTRL2, 0x8600);
+  this->write_byte(SYSCLK_CTRL, 0x8b08);
+  this->write_byte(MOD_CLK_ENA, 0x800c);
+  this->write_byte(MOD_RST_CTRL, 0x800c);
+  this->write_byte(I2S_SR_CTRL, 0x7000);
+  this->write_byte(I2S1LCK_CTRL, 0x8850);
+  this->write_byte(I2S1_SDOUT_CTRL, 0xc000);
+  this->write_byte(I2S1_SDIN_CTRL, 0xc000);
+  this->write_byte(I2S1_MXR_SRC, 0x2200);
+  this->write_byte(ADC_SRCBST_CTRL, 0xccc4);
+  this->write_byte(ADC_SRC, 0x2020);
+  this->write_byte(ADC_DIG_CTRL, 0x8000);
+  this->write_byte(ADC_APC_CTRL, 0xbbc3);
+  this->write_byte(DAC_MXR_SRC, 0xcc00);
+  this->write_byte(DAC_DIG_CTRL, 0x8000);
+  this->write_byte(OMIXER_SR, 0x0081);
+  this->write_byte(OMIXER_DACA_CTRL, 0xf080);
+  this->write_byte(0x58, 0xeabd);
+  
+}
+
 
 }
 }

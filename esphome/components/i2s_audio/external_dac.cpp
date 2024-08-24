@@ -175,8 +175,8 @@ bool ES8388::set_mute_audio( bool mute ){
 
 #define AC101_ERROR_CHECK(func)                                                \
   if (!(func)) {                                                               \
-    this->mark_failed();                                                       \
-    return;                                                                    \
+    esph_log_d(TAG, "AC101 failed");                                           \
+    return false                                                               \
   }
 #define AC101_READ_REG(reg, value) AC101_ERROR_CHECK(this->ReadReg(reg, value));
 #define AC101_WRITE_REG(reg, value)                                            \
@@ -199,8 +199,8 @@ bool AC101::init_device(){
   {
     AC101_READ_REG(AC101_CHIP_AUDIO_RS, &val);
     if (val != 0x0101) {
-      this->mark_failed();
-      return;
+      esph_log_d(TAG, "AC101 failed");
+      return false;
     }
   }
 
@@ -215,29 +215,29 @@ bool AC101::init_device(){
   AC101_WRITE_REG(AC101_MOD_CLK_ENA, 0x800c);
   AC101_WRITE_REG(AC101_MOD_RST_CTRL, 0x800c);
     // Set default at I2S, 44.1KHz, 16bit
-  AC101_WRITE_REG(AC101_I2S_SR_CTRL, SAMPLE_RATE_44100);
+  AC101_WRITE_REG(AC101_I2S_SR_CTRL, 0x7000);
 //SetI2sClock
   AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
   val &= ~0x7FC0;
   val |= uint16_t(0) << 14;
-  val |= uint16_t(BCLK_DIV_8) << 9;
+  val |= uint16_t(0x4) << 9;
   val |= uint16_t(0) << 13;
-  val |= uint16_t(LRCK_DIV_32) << 6;
+  val |= uint16_t(0x1) << 6;
   //SetI2sMode
   AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
   AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
   val &= ~0x8000;
-  val |= uint16_t(MODE_SLAVE) << 15;
+  val |= uint16_t(0x01) << 15;
   AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
   //SetI2sWordSize
   AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
   val &= ~0x0030;
-  val |= uint16_t(WORD_SIZE_16_BITS) << 4;
+  val |= uint16_t(0x01) << 4;
   AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
   //SetI2sFormat
   AC101_READ_REG(AC101_I2S1LCK_CTRL, &val);
   val &= ~0x000C;
-  val |= uint16_t(DATA_FORMAT_I2S) << 2;
+  val |= uint16_t(0x00) << 2;
   AC101_WRITE_REG(AC101_I2S1LCK_CTRL, val);
   // AIF config
   AC101_WRITE_REG(AC101_I2S1_SDOUT_CTRL, 0xc000);
@@ -255,13 +255,14 @@ bool AC101::init_device(){
   AC101_WRITE_REG(AC101_OMIXER_SR, 0x0081);
   AC101_WRITE_REG(AC101_OMIXER_DACA_CTRL, 0xf080);
 
-  this->SetMode(MODE_ADC_DAC);
+  //SetMode MODE_ADC_DAC
   AC101_WRITE_REG(AC101_MOD_CLK_ENA, 0x800c);
   AC101_WRITE_REG(AC101_MOD_RST_CTRL, 0x800c);
   AC101_WRITE_REG(AC101_OMIXER_DACA_CTRL, 0xff80);
   delay(100);
   AC101_WRITE_REG(AC101_HPOUT_CTRL, 0xfbc0);
   AC101_WRITE_REG(AC101_SPKOUT_CTRL, 0xeabd);
+  return true;
 }
 
 bool AC101::apply_i2s_settings(const i2s_driver_config_t&  i2s_cfg){
